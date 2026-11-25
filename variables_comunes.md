@@ -37,7 +37,7 @@ Resultantes del corte temporal estricto (ordenados previamente por `fecha`):
 ---
 
 ## 4. Objetos de Modelado y Métricas (Zona Persona 2)
-Objetos generados durante la validación y evaluación final:
+Objetos generados durante la validación y evaluación final: 
 
 * `preprocesador`: Objeto `ColumnTransformer` sin ajustar (*unfitted*) entregado por **Persona 1**.
 * `cv`: Estrategia/generador de particiones temporales sobre `df_desarrollo`.
