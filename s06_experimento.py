@@ -22,8 +22,10 @@ import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import Ridge
 from sklearn.dummy import DummyRegressor
+from sklearn.impute import SimpleImputer
 from sklearn.model_selection import (TimeSeriesSplit, cross_validate)
 from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler, OneHotEncoder, OrdinalEncoder
 
 # Creamos una constante con el nombre del csv
 RUTA_DATOS = "consumo_edificios_brisa.csv"
@@ -209,6 +211,47 @@ for pliegue, (idx_train, idx_val) in enumerate(cv.split(X_desarrollo), start=1):
 # qué variables necesitan escalado.
 
 # Rellenar
+
+# Reglas para la imputación del preprocesado
+
+# Numéricas: imputamos con mediana (robusta ante edificios grandes) y escalamos
+# para que la regularización de Ridge trate todas las escalas por igual.
+prep_numericas = Pipeline(steps=[
+    ("imputador", SimpleImputer(strategy="median")),
+    ("escalador", StandardScaler())
+])
+
+# Nominales: imputamos con moda y aplicamos OneHotEncoder.
+# handle_unknown="ignore" evita fallos si aparece un edificio o categoría nueva.
+prep_nominales = Pipeline(steps=[
+    ("imputador", SimpleImputer(strategy="most_frequent")),
+    ("onehot", OneHotEncoder(handle_unknown="ignore"))
+])
+
+# Ordinales: respetamos el orden real A -> G de eficiencia y escalamos.
+prep_ordinales = Pipeline(steps=[
+    ("imputador", SimpleImputer(strategy="most_frequent")),
+    ("ordinal", OrdinalEncoder(
+        categories=[ORDEN_CERTIFICACION],
+        handle_unknown="use_encoded_value",
+        unknown_value=-1
+    )),
+    ("escalador", StandardScaler())
+])
+
+# Binarias: ya son 0/1, solo aseguramos que no haya valores nulos.
+prep_binarias = Pipeline(steps=[
+    ("imputador", SimpleImputer(strategy="most_frequent"))
+])
+
+# Unimos todas las ramas en el ColumnTransformer (sin hacer .fit() todavía;
+# se ajustará únicamente dentro de cada pliegue de entrenamiento).
+preprocesador = ColumnTransformer(transformers=[
+    ("num", prep_numericas, COLS_NUMERICAS),
+    ("nom", prep_nominales, COLS_NOMINALES),
+    ("ord", prep_ordinales, COLS_ORDINALES),
+    ("bin", prep_binarias, COLS_BINARIAS)
+])
 
 
 # Encadenamos el preprocesador sin ajustar con los estimadores fijados por la empresa.
