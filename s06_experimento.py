@@ -180,7 +180,7 @@ dividir una misma fecha entre entrenamiento y validación, y los primeros pliegu
 cv = TimeSeriesSplit(n_splits=5)
 
 print("\n" + "=" * 75)
-print("VALIDACIÓN TEMPORAL EN DESARROLLO (TimeSeriesSplit)")
+print("Validacion Temporal en desarrollo (TimeSeriesSplit)")
 print("=" * 75)
 for pliegue, (idx_train, idx_val) in enumerate(cv.split(X_desarrollo), start=1):
     f_train_ini = df_desarrollo.loc[idx_train, "fecha"].min()
