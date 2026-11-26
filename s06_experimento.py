@@ -23,6 +23,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import Ridge
 from sklearn.dummy import DummyRegressor
 from sklearn.model_selection import (TimeSeriesSplit, cross_validate)
+from sklearn.pipeline import Pipeline
 
 # Creamos una constante con el nombre del csv
 RUTA_DATOS = "consumo_edificios_brisa.csv"
@@ -157,3 +158,40 @@ for pliegue, (idx_train, idx_val) in enumerate(cv.split(X_desarrollo), start=1):
     print(f"Pliegue {pliegue}: Train={len(idx_train)} filas ({f_train_ini}..{f_train_fin}) -> "
           f"Val={len(idx_val)} filas ({f_val_ini}..{f_val_fin})")
 """
+
+
+# Contrucción del pipeline del modelo y baseline:
+
+# Como completar los valores ausentes de las variables numéricas y categóricas
+
+# "Rellenar"
+
+
+# variables son nominales, cuáles tienen un orden real y cómo se codifican
+
+# "Rellenar"
+
+# Qué ocurre si aparece una categoría que no estaba presente al ajustar el preprocesador
+
+# "Rellenar"
+
+
+# qué variables necesitan escalado.
+
+# Rellenar
+
+
+# Encadenamos el preprocesador sin ajustar con los estimadores fijados por la empresa.
+# No modificamos hiperparámetros de Ridge para mantener el experimento controlado.
+
+pipeline_ridge = Pipeline(steps=[
+    ("preprocesamiento", preprocesador),
+    ("modelo", Ridge(alpha=1.0))
+])
+
+# Baseline equivalente: ignora las variables predictoras y predice siempre la mediana
+# del consumo de entrenamiento. Sirve para comprobar si Ridge aporta valor real.
+pipeline_baseline = Pipeline(steps=[
+    ("preprocesamiento", preprocesador),
+    ("modelo", DummyRegressor(strategy="median"))
+])
