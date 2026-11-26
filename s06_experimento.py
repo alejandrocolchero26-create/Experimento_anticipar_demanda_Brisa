@@ -140,7 +140,7 @@ for col in COLS_NOMINALES+ COLS_ORDINALES + COLS_BINARIAS:
 
 # Paso de dimension 3 - Consistencia física y lógica
 # Comprobamos en cuanto a consistencia si existe una temperatura prevista minima que sea mayor que la maxima
-incoherencias_temp = (df_desarrollo["temperatura_prevista_min"] > df_desarrollo["temperatura_prevista_max"]).sum()
+incoherencias_temp = (df_desarrollo["temp_prevista_min"] > df_desarrollo["temp_prevista_max"]).sum()
 # Comprobamos si hay superficies por metro cuadrado que sea menor o igual a 0
 superficie_invalida = (df_desarrollo["superficie_m2"] <= 0).sum()
 # Comprobamos si hay una ocupacion prevista entre 0 y 100
@@ -177,7 +177,7 @@ dividir una misma fecha entre entrenamiento y validación, y los primeros pliegu
 cv = TimeSeriesSplit(n_splits=5)
 
 print("\n" + "=" * 75)
-print("VALIDACIÓN TEMPORAL EN DESARROLLO (TimeSeriesSplit)")
+print("Validacion Temporal en desarrollo (TimeSeriesSplit)")
 print("=" * 75)
 for pliegue, (idx_train, idx_val) in enumerate(cv.split(X_desarrollo), start=1):
     f_train_ini = df_desarrollo.loc[idx_train, "fecha"].min()
