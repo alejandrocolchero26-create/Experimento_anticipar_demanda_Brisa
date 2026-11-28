@@ -296,3 +296,30 @@ print("-" * 75)
 print(f"MEDIA VALIDACIÓN  -> Ridge: {mae_ridge.mean():.2f} kWh (± {mae_ridge.std():.2f}) | "
       f"Baseline: {mae_baseline.mean():.2f} kWh (± {mae_baseline.std():.2f})")
 print(f"MEJORA MEDIA      -> {mae_baseline.mean() - mae_ridge.mean():+.2f} kWh respecto al baseline")
+
+
+
+# Decisiones definitivas del experimento antes de abrir test:
+print("\n" + "=" * 75)
+print("CIERRE DE DECISIONES Y EVALUACIÓN FINAL ÚNICA EN TEST")
+print("=" * 75)
+print(f"- Columnas predictoras ({len(FEATURES)}): {FEATURES}")
+print(f"- Columnas excluidas ({len(COLS_EXCLUIDAS)}): {COLS_EXCLUIDAS}")
+print("- Preprocesamiento: Mediana+StandardScaler (num), Moda+OneHot (nom), Moda+Ordinal+Scaler (ord), Moda (bin)")
+print("- Estrategia de validación: TimeSeriesSplit(n_splits=5) sobre desarrollo ordenado por fecha")
+print("- Estimador: Ridge(alpha=1.0) | Baseline: DummyRegressor(strategy='median') | Métrica: MAE (kWh)")
+
+# Ajustamos ambos pipelines con todo el conjunto de desarrollo y evaluamos el test
+pipeline_ridge.fit(X_desarrollo, y_desarrollo)
+pipeline_baseline.fit(X_desarrollo, y_desarrollo)
+
+pred_test_ridge = pipeline_ridge.predict(X_test)
+pred_test_baseline = pipeline_baseline.predict(X_test)
+
+mae_test = mean_absolute_error(y_test, pred_test_ridge)
+mae_test_baseline = mean_absolute_error(y_test, pred_test_baseline)
+
+print("-" * 75)
+print(f"MAE FINAL EN TEST (Ridge)   : {mae_test:.2f} kWh")
+print(f"MAE FINAL EN TEST (Baseline): {mae_test_baseline:.2f} kWh")
+print(f"MEJORA FINAL EN TEST        : {mae_test_baseline - mae_test:+.2f} kWh")
