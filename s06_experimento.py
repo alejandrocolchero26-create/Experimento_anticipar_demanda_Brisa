@@ -23,6 +23,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import Ridge
 from sklearn.dummy import DummyRegressor
 from sklearn.impute import SimpleImputer
+from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import (TimeSeriesSplit, cross_validate)
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, OneHotEncoder, OrdinalEncoder
@@ -268,3 +269,30 @@ pipeline_baseline = Pipeline(steps=[
     ("preprocesamiento", preprocesador),
     ("modelo", DummyRegressor(strategy="median"))
 ])
+
+
+# Evalua ambos pipelines con las mismas particiones temporales y la misma
+# métrica (MAE). Multiplicamos por -1 porque scikit-learn devuelve el error en negativo.
+resultados_ridge = cross_validate(
+    pipeline_ridge, X_desarrollo, y_desarrollo, cv=cv, scoring="neg_mean_absolute_error"
+)
+resultados_baseline = cross_validate(
+    pipeline_baseline, X_desarrollo, y_desarrollo, cv=cv, scoring="neg_mean_absolute_error"
+)
+
+mae_ridge = -resultados_ridge["test_score"]
+mae_baseline = -resultados_baseline["test_score"]
+
+print("\n" + "=" * 75)
+print("RESULTADOS DE VALIDACIÓN CRUZADA (MAE en kWh)")
+print("=" * 75)
+for i in range(len(mae_ridge)):
+    diferencia = mae_baseline[i] - mae_ridge[i]
+    print(f"Pliegue {i+1}: Ridge = {mae_ridge[i]:.2f} kWh | "
+          f"Baseline = {mae_baseline[i]:.2f} kWh | "
+          f"Mejora = {diferencia:+.2f} kWh")
+
+print("-" * 75)
+print(f"MEDIA VALIDACIÓN  -> Ridge: {mae_ridge.mean():.2f} kWh (± {mae_ridge.std():.2f}) | "
+      f"Baseline: {mae_baseline.mean():.2f} kWh (± {mae_baseline.std():.2f})")
+print(f"MEJORA MEDIA      -> {mae_baseline.mean() - mae_ridge.mean():+.2f} kWh respecto al baseline")
